@@ -1,0 +1,16 @@
+services:
+  terraform:
+    container_name: terraform
+    build:
+      context: ./terraform
+    volumes:
+      - ./terraform:/app/terraform
+    command: ["./run.sh"]
+
+  server:
+    container_name: server
+    build:
+      context: ./server
+    volumes:
+      - ./server:/app/server
+    command: ["./run.sh"]
