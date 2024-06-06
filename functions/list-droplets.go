@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 )
 
-func ListDropletsHandler(w http.ResponseWriter) {
-	token := "dop_v1_11f72fc8c6223c25925ddeaaaca7f61da2ba8377fd9abb121d920812a90b5dc6"
+func ListDropletsHandler(w http.ResponseWriter, r *http.Request) {
+	token := os.Getenv("DO_TOKEN")
 	output, err := RunTerraformListDroplets(token)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error: %v, Output: %s", err, string(output)), http.StatusInternalServerError)
