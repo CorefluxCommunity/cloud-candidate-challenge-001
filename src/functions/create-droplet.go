@@ -3,7 +3,6 @@ package functions
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"src/structs"
@@ -15,8 +14,6 @@ func CreateDropletHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "DigitalOcean token not found. Please set the DO_TOKEN environment variable.", http.StatusInternalServerError)
 		return
 	}
-
-	log.Println("DO_TOKEN:", token) // Log the token value for debugging
 
 	var req structs.CreateDropletRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
