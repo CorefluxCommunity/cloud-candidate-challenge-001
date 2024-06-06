@@ -9,6 +9,10 @@ import (
 
 func ListDropletsHandler(w http.ResponseWriter, r *http.Request) {
 	token := os.Getenv("DO_TOKEN")
+	if token == "" {
+		http.Error(w, "DigitalOcean token not found. Please set the DO_TOKEN environment variable.", http.StatusInternalServerError)
+		return
+	}
 	output, err := RunTerraformListDroplets(token)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error: %v, Output: %s", err, string(output)), http.StatusInternalServerError)

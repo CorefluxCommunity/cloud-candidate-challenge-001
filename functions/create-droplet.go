@@ -9,6 +9,12 @@ import (
 )
 
 func CreateDropletHandler(w http.ResponseWriter, r *http.Request) {
+	token := os.Getenv("DO_TOKEN")
+	if token == "" {
+		http.Error(w, "DigitalOcean token not found. Please set the DO_TOKEN environment variable.", http.StatusInternalServerError)
+		return
+	}
+
 	var req structs.CreateDropletRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -21,7 +27,6 @@ func CreateDropletHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := os.Getenv("DO_TOKEN")
 	output, err := RunTerraformApply(req, token)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error: %v, Output: %s", err, string(output)), http.StatusInternalServerError)
