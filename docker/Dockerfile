@@ -10,15 +10,16 @@ RUN wget https://releases.hashicorp.com/terraform/1.4.6/terraform_1.4.6_linux_am
     && mv terraform /usr/local/bin/ \
     && rm terraform_1.4.6_linux_amd64.zip
 
-COPY go.mod .
+COPY src/go.mod ./
+
+COPY .env ./
 
 RUN go mod download
 
-COPY . .
+COPY src/ .
 
 RUN go build -o app .
 
 RUN chmod +x ./app
 
-ENTRYPOINT ["./app"]
-
+CMD ["./app"]
