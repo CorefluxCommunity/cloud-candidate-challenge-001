@@ -32,5 +32,8 @@ func ListDropletsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(droplets)
+	if err := json.NewEncoder(w).Encode(droplets); err != nil {
+		http.Error(w, fmt.Sprintf("Error encoding response: %v", err), http.StatusInternalServerError)
+		return
+	}
 }
