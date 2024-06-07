@@ -7,7 +7,19 @@ import (
 	"os"
 	"os/exec"
 	"src/structs"
+	"strings"
 )
+
+func HandleHTTPResponse(w http.ResponseWriter, ch <-chan string) {
+	result := <-ch
+	if strings.HasPrefix(result, "Error:") {
+		http.Error(w, result, http.StatusInternalServerError)
+	} else {
+		if _, err := fmt.Fprintln(w, result); err != nil {
+			http.Error(w, fmt.Sprintf("Error writing response: %v", err), http.StatusInternalServerError)
+		}
+	}
+}
 
 func GetDigitalOceanToken() (string, error) {
 	token := os.Getenv("DO_TOKEN")
