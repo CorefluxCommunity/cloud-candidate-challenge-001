@@ -12,6 +12,63 @@ Welcome to the Coreflux Cloud Team candidate challenge 001! In this challenge, y
 - Request Parsing: Design the server to accept JSON input in the HTTP request body and parse it to the Terraform command.
 - Return a Response: Once the Terraform apply returns the output, the server should return it as the response.
 
+## Instructions
+
+### Prerequisites
+
+- Ensure you have Docker installed on your machine
+- Obtain a DigitalOcean API token
+
+### Setup
+
+1. **Clone the Repository:**
+   ```sh
+   git clone <repository-url>
+   cd <repository-directory>
+2. **Create .env file**
+    ```sh
+    DO_TOKEN=your_digitalocean_token
+3. **Build and run with Docker Compose**
+    ```sh
+    docker-compose up --build
+
+### Endpoints
+
+1. **/create** - Creates a droplet in DigitalOcean based on the JSON payload provided in the request body.
+   - **Method:** POST
+   - **Request Body Example:**
+   ```json
+   {
+    "image": "ubuntu-20-04-x64",
+    "region": "nyc3",
+    "size": "s-1vcpu-1gb",
+    "droplet_name": "coreflux"
+    }
+    ```
+    - **Response:** Returns the IP address of the created droplet.    
+    
+
+2. **/all** - Returns all the droplets created.
+    - **Method:** GET
+    - **Response:** JSON array of all droplets.
+   
+## How It Works
+
+**Endpoint Execution:**
+- **/create Endpoint:**
+    - When a POST request is made to the `/create` endpoint with a JSON payload, the server parses the JSON input to extract the necessary parameters for creating a droplet.
+    - The server then initiates the Terraform module responsible for creating droplets by executing the `terraform init` and `terraform apply` command with the provided parameters.
+    - That guarantees that terraform does not initiate modules not needed.
+    - Terraform uses the DigitalOcean provider to create the droplet in the specified region with the given characteristics.
+    - Once the droplet is created, Terraform outputs the IP address, which the server captures and returns in the HTTP response.
+
+
+- **/all Endpoint:**
+    - When a GET request is made to the `/all` endpoint, the server initiates the Terraform module responsible for listing all created droplets by executing the `terraform init` and `terraform apply` command configured to list droplets.
+    - Terraform uses the DigitalOcean provider to retrieve information about all droplets created.
+    - The server captures the list of droplets and returns it as a JSON array in the HTTP response.
+
+
 ## Resources
 
 - [Go Documentation](https://go.dev/doc/)
