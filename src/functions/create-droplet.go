@@ -1,11 +1,11 @@
 package functions
 
 import (
-	"awesomeProject/structs"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
+	"src/structs"
 )
 
 func CreateDropletHandler(w http.ResponseWriter, r *http.Request) {

@@ -1,21 +1,25 @@
 package main
 
 import (
-	"awesomeProject/functions"
 	"fmt"
 	"github.com/joho/godotenv"
+	"log"
 	"net/http"
+	"src/functions"
 )
 
-func main() {
+func init() {
 	err := godotenv.Load()
 	if err != nil {
-		return
+		log.Println("Error loading .env file")
 	}
+}
+
+func main() {
 	fmt.Println("Server running...")
 	http.HandleFunc("/create", functions.CreateDropletHandler)
 	http.HandleFunc("/all", functions.ListDropletsHandler)
-	err = http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		fmt.Println(err)
 	}

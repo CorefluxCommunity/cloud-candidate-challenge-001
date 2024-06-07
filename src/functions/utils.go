@@ -1,10 +1,10 @@
 package functions
 
 import (
-	"awesomeProject/structs"
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"src/structs"
 )
 
 func RunTerraformInit(dir string) ([]byte, error) {
