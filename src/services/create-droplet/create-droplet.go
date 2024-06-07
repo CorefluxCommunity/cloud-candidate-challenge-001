@@ -4,35 +4,47 @@ import (
 	"fmt"
 	"net/http"
 	"src/services"
+	"sync"
 )
 
-func CreateDropletHandler(w http.ResponseWriter, r *http.Request) {
-	token, err := services.GetDigitalOceanToken()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+func CreateDropletHandler(w http.ResponseWriter, r *http.Request, ch chan<- string, wg *sync.WaitGroup) {
+	defer wg.Done()
 
-	req, err := services.DecodeRequest(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	go func() {
+		token, err := services.GetDigitalOceanToken()
+		if err != nil {
+			ch <- fmt.Sprintf("Error: %v", err)
+			return
+		}
 
-	output, err := services.RunTerraformApply(req, token)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Error: %v, Output: %s", err, string(output)), http.StatusInternalServerError)
-		return
-	}
+		req, err := services.DecodeRequest(r)
+		if err != nil {
+			ch <- fmt.Sprintf("Error: %v", err)
+			return
+		}
 
-	ipAddress, err := services.GetDropletIPAddress()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+		output, err := services.RunTerraformApply(req, token)
+		if err != nil {
+			ch <- fmt.Sprintf("Error: %v, Output: %s", err, string(output))
+			return
+		}
 
-	if _, err := fmt.Fprintln(w, ipAddress); err != nil {
-		http.Error(w, fmt.Sprintf("Error writing response: %v", err), http.StatusInternalServerError)
-		return
-	}
+		ipAddress, err := services.GetDropletIPAddress()
+		if err != nil {
+			ch <- fmt.Sprintf("Error: %v", err)
+			return
+		}
+
+		ch <- ipAddress
+	}()
+}
+
+func CreateDropletRoutine(w http.ResponseWriter, r *http.Request) {
+	ch := make(chan string)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go CreateDropletHandler(w, r, ch, &wg)
+	wg.Wait()
+	services.HandleHTTPResponse(w, ch)
+	close(ch)
 }
