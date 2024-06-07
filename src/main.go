@@ -5,7 +5,8 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"net/http"
-	"src/functions"
+	"src/services/create-droplet"
+	"src/services/list-droplets"
 )
 
 func init() {
@@ -17,8 +18,8 @@ func init() {
 
 func main() {
 	fmt.Println("Server running...")
-	http.HandleFunc("/create", functions.CreateDropletHandler)
-	http.HandleFunc("/all", functions.ListDropletsHandler)
+	http.HandleFunc("/create", create_droplet.CreateDropletHandler)
+	http.HandleFunc("/all", list_droplets.ListDropletsHandler)
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		fmt.Println(err)
