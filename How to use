@@ -1,25 +1,58 @@
-1-cd ~/go-http-server
-2-go run main.go
-3-other terminal or postman run the code below(change digitalyokenid to your own, same with ssh fingerprint and vpc_uuid)
+# Go HTTP Server with Terraform
 
+This project sets up a Go HTTP server that dynamically creates DigitalOcean Droplets using Terraform based on JSON input received via HTTP requests.
+
+## Prerequisites
+
+1. [Go](https://golang.org/doc/install) installed
+2. [Terraform](https://www.terraform.io/downloads.html) installed
+3. A [DigitalOcean account](https://www.digitalocean.com/) and API token
+
+## Project Structure
+
+go-http-server/
+├── main.go
+├── go.mod
+└── terraform/
+    ├── main.tf
+    ├── variables.tf
+
+## Setup
+
+1. **Clone the repository**
+
+    ```sh
+    git clone https://github.com/your-username/repository-name.git
+    cd repository-name
+    ```
+
+2. **Set up Terraform configuration**
+
+    Navigate to the `terraform` directory and ensure the `main.tf` and `variables.tf` files are in place.
+
+3. **Run the Go HTTP server**
+
+    ```sh
+    go run main.go
+    ```
+
+## Usage
+
+Send a POST request to the server with the necessary JSON payload to create a DigitalOcean Droplet. Example using `curl`:
+
+```sh
 curl -X POST http://localhost:8080/terraform \
 -H "Content-Type: application/json" \
 -d '{
-  "digitalocean_token": "digitaltokenid",
+  "digitalocean_token": "your_digitaltokenid",
   "image": "ubuntu-20-04-x64",
   "name": "first-project",
   "region": "fra1",
   "size": "s-1vcpu-512mb-10gb",
-  "ssh_keys": ["ssh fingerprint"],
+  "ssh_keys": ["your_ssh fingerprint"],
   "ipv6": true,
   "monitoring": true,
-  "vpc_uuid": "vpc_uuid"
+  "vpc_uuid": "your_vpc_uuid"
 }'
 
 
-troubleshooting 
-
-if you cant run terraform you need to in a terminal do:
-
-1-eliminate the provider file
-2-terraform init
