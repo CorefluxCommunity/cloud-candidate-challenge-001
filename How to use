@@ -15,3 +15,11 @@ curl -X POST http://localhost:8080/terraform \
   "monitoring": true,
   "vpc_uuid": "vpc_uuid"
 }'
+
+
+troubleshooting 
+
+if you cant run terraform you need to in a terminal do:
+
+1-eliminate the provider file
+2-terraform init
