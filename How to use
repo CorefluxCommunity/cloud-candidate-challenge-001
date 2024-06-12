@@ -1,0 +1,17 @@
+1-cd ~/go-http-server
+2-go run main.go
+3-other terminal or postman run the code below(change digitalyokenid to your own, same with ssh fingerprint and vpc_uuid)
+
+curl -X POST http://localhost:8080/terraform \
+-H "Content-Type: application/json" \
+-d '{
+  "digitalocean_token": "digitaltokenid",
+  "image": "ubuntu-20-04-x64",
+  "name": "first-project",
+  "region": "fra1",
+  "size": "s-1vcpu-512mb-10gb",
+  "ssh_keys": ["ssh fingerprint"],
+  "ipv6": true,
+  "monitoring": true,
+  "vpc_uuid": "vpc_uuid"
+}'
