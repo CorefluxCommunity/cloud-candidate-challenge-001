@@ -1,2 +1,5 @@
-# Define Terraform variables 
-# Find the best way to pass sensitive information
+# Use terraform.tfvars to pass the API token
+
+variable "do_token" {
+  description = "DigitalOcean API token"
+}
