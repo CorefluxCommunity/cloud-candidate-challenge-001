@@ -7,6 +7,6 @@ import (
 )
 
 func main() {
-	server := api.NewServer(":8000")
+	server := api.NewServer(":8000", api.Controller{})
 	log.Fatal(server.Start())
 }
