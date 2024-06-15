@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     digitalocean = {
-      source = "digitalocean/digitalocean"
+      source  = "digitalocean/digitalocean"
       version = "2.39.1"
     }
   }
@@ -12,11 +12,11 @@ provider "digitalocean" {
 }
 
 resource "digitalocean_droplet" "web" {
-  image = var.image
-  name = "test-web-vm"
-  region = "nyc1"
-  size = "s-1vcpu-1gb"
-  monitoring = true
-  ipv6 = true
+  image      = var.image
+  name       = var.name
+  region     = var.region
+  size       = var.size
+  monitoring = var.monitoring
+  ipv6       = var.ipv6
 }
 
