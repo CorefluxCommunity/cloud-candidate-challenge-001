@@ -86,16 +86,17 @@ func (s DropletService) runTerraformApply(req droplet.DropletRequest) error {
 }
 
 func (s DropletService) terraformOutput() (*droplet.DropletResponse, error) {
-	var dropletResponse *droplet.DropletResponse
 	cmd := exec.Command("terraform", "output", "-json")
 	cmd.Dir = s.Dir
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, err
 	}
-	err = json.Unmarshal(output, dropletResponse)
+	var dropletResponse droplet.DropletResponse
+	err = json.Unmarshal(output, &dropletResponse)
 	if err != nil {
+		log.Println("fail to unmarshal response")
 		return nil, err
 	}
-	return dropletResponse, nil
+	return &dropletResponse, nil
 }

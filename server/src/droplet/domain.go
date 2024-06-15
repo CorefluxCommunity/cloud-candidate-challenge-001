@@ -21,6 +21,10 @@ func (r DropletRequest) IsValid() bool {
 }
 
 type DropletResponse struct {
-	Id   string `json:"droplet_id"`
-	Ipv4 string `json:"droplet_ip_address"`
+	Id struct {
+		Value string `json:"value"`
+	} `json:"droplet_id"`
+	Ipv4 struct {
+		Value string `json:"value"`
+	} `json:"droplet_ip_address"`
 }
