@@ -7,10 +7,10 @@ import (
 
 type server struct {
 	addr       string
-	controller Controller
+	controller *DropletController
 }
 
-func NewServer(addr string, controller Controller) *server {
+func NewServer(addr string, controller *DropletController) *server {
 	return &server{
 		addr:       addr,
 		controller: controller,

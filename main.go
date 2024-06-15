@@ -7,6 +7,7 @@ import (
 )
 
 func main() {
-	server := api.NewServer(":8000", api.Controller{})
+
+	server := api.NewServer(":8000", api.NewDropletController())
 	log.Fatal(server.Start())
 }

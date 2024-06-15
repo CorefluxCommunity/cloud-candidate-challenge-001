@@ -18,7 +18,11 @@ type DropletService struct {
 	Tfvars string
 }
 
-func (s DropletService) CreateDroplet(req terraform.DropletRequest) (*terraform.DropletResponse, error) {
+func NewDropletService() *DropletService {
+	return &DropletService{}
+}
+
+func (s *DropletService) CreateDroplet(req terraform.DropletRequest) (*terraform.DropletResponse, error) {
 	var err error
 	if !req.IsValid() {
 		return nil, fmt.Errorf("invalid request")
