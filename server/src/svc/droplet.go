@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 
 	"github.com/Desgue/cloud-candidate-challenge-001/src/droplet"
 )
@@ -19,7 +18,7 @@ type DropletService struct {
 }
 
 func NewDropletService() *DropletService {
-	return &DropletService{}
+	return &DropletService{Dir: "../terraform"}
 }
 
 func (s *DropletService) CreateDroplet(req droplet.DropletRequest) (*droplet.DropletResponse, error) {
@@ -28,102 +27,17 @@ func (s *DropletService) CreateDroplet(req droplet.DropletRequest) (*droplet.Dro
 	if !req.IsValid() {
 		return nil, fmt.Errorf("invalid request")
 	}
-	err = s.createDir(req)
-	if err != nil {
-		return nil, err
-	}
-	err = s.createStaticFiles()
-	if err != nil {
-		return nil, err
-	}
-	err = s.createTfvars(req)
-	if err != nil {
-		return nil, err
-	}
+
 	err = s.runTerraformInit()
 	if err != nil {
 		return nil, err
 	}
-	err = s.runTerraformApply()
+	err = s.runTerraformApply(req)
 	if err != nil {
 		return nil, err
 	}
 
 	return s.terraformOutput()
-}
-
-func (s *DropletService) CleanupTempFiles() {
-	log.Println("Starting cleanup process")
-	err := os.RemoveAll(s.Dir)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Printf("Removed %s", s.Dir)
-	err = os.Remove(s.Main)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Printf("Removed %s", s.Main)
-	err = os.Remove(s.Output)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Printf("Removed %s", s.Tfvars)
-	err = os.Remove(s.Tfvars)
-	if err != nil {
-		log.Println(err)
-	}
-	s.Dir = ""
-	s.Main = ""
-	s.Output = ""
-	s.Tfvars = ""
-}
-
-func (s *DropletService) createDir(req droplet.DropletRequest) error {
-	tempDir, err := os.MkdirTemp("", fmt.Sprintf("droplet-%s-%s-", req.Name, req.Region))
-	if err != nil {
-		return err
-	}
-	s.Dir = tempDir
-	return nil
-
-}
-func (s *DropletService) createTfvars(req droplet.DropletRequest) error {
-	// Parse the request and create terraform files
-	fileName := fmt.Sprintf("droplet-%s-%s.tfvars", req.Name, req.Region)
-	fileContent := fmt.Sprintf(
-		droplet.TfvarsModel,
-		req.Token,
-		req.Image,
-		req.Name,
-		req.Region,
-		req.Size,
-		req.Monitoring,
-		req.Ipv6,
-	)
-
-	err := os.WriteFile(filepath.Join(s.Dir, fileName), []byte(fileContent), 0644)
-	if err != nil {
-		return err
-	}
-	s.Tfvars = fileName
-	return nil
-}
-
-func (s *DropletService) createStaticFiles() error {
-	err := os.WriteFile(filepath.Join(s.Dir, "main.tf"), []byte(droplet.MainModel), 0644)
-	if err != nil {
-		return err
-	}
-	err = os.WriteFile(filepath.Join(s.Dir, "output.tf"), []byte(droplet.OutputModel), 0644)
-	if err != nil {
-		return err
-	}
-	err = os.WriteFile(filepath.Join(s.Dir, "variables.tf"), []byte(droplet.VariablesModel), 0644)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (s DropletService) runTerraformInit() error {
@@ -139,9 +53,29 @@ func (s DropletService) runTerraformInit() error {
 	return nil
 }
 
-func (s DropletService) runTerraformApply() error {
-	varFile := fmt.Sprintf(`-var-file=%s`, filepath.Join(s.Dir, s.Tfvars))
-	cmd := exec.Command("terraform", "apply", "-auto-approve", varFile)
+func (s DropletService) runTerraformApply(req droplet.DropletRequest) error {
+	args := []string{
+		"apply",
+		"-auto-approve",
+		fmt.Sprintf(`
+		-var="api_token=%s"
+		-var="image=%s"
+		-var="name=%s"
+		-var="region=%s"
+		-var="size=%s"
+		-var="monitoring=%t"
+		-var="ipv6=%t"
+		`,
+			req.Token,
+			req.Image,
+			req.Name,
+			req.Region,
+			req.Size,
+			req.Monitoring,
+			req.Ipv6,
+		),
+	}
+	cmd := exec.Command("terraform", args...)
 	log.Printf("Running %s %s", cmd.Path, cmd.Args[3])
 	cmd.Dir = s.Dir
 	cmd.Stdout = os.Stdout
