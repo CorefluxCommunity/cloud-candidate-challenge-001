@@ -64,10 +64,12 @@ func (s *DropletService) CleanupTempFiles() {
 	if err != nil {
 		log.Println(err)
 	}
+	log.Printf("Removed %s", s.Main)
 	err = os.Remove(s.Output)
 	if err != nil {
 		log.Println(err)
 	}
+	log.Printf("Removed %s", s.Tfvars)
 	err = os.Remove(s.Tfvars)
 	if err != nil {
 		log.Println(err)
