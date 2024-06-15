@@ -3,6 +3,7 @@ package svc
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -23,6 +24,7 @@ func NewDropletService() *DropletService {
 }
 
 func (s *DropletService) CreateDroplet(req terraform.DropletRequest) (*terraform.DropletResponse, error) {
+	log.Println("Creating DigitalOcean Droplet")
 	var err error
 	if !req.IsValid() {
 		return nil, fmt.Errorf("invalid request")
@@ -51,16 +53,29 @@ func (s *DropletService) CreateDroplet(req terraform.DropletRequest) (*terraform
 	return s.terraformOutput()
 }
 
-func (s *DropletService) Cleanup() error {
+func (s *DropletService) CleanupTempFiles() {
+	log.Println("Starting cleanup process")
 	err := os.RemoveAll(s.Dir)
 	if err != nil {
-		return err
+		log.Println(err)
+	}
+	log.Printf("Removed %s", s.Dir)
+	err = os.Remove(s.Main)
+	if err != nil {
+		log.Println(err)
+	}
+	err = os.Remove(s.Output)
+	if err != nil {
+		log.Println(err)
+	}
+	err = os.Remove(s.Tfvars)
+	if err != nil {
+		log.Println(err)
 	}
 	s.Dir = ""
 	s.Main = ""
 	s.Output = ""
 	s.Tfvars = ""
-	return nil
 }
 
 func (s *DropletService) createDir(req terraform.DropletRequest) error {
@@ -100,6 +115,10 @@ func (s *DropletService) createStaticFiles() error {
 		return err
 	}
 	err = os.WriteFile(filepath.Join(s.Dir, "output.tf"), []byte(droplet.OutputModel), 0644)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(filepath.Join(s.Dir, "variables.tf"), []byte(droplet.VariablesModel), 0644)
 	if err != nil {
 		return err
 	}

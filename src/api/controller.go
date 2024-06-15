@@ -36,10 +36,16 @@ func (c *DropletController) PostHandler(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	defer c.DropletService.CleanupTempFiles()
+	dropletRes, err := c.DropletService.CreateDroplet(dropletReq)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	// responde o output do terraform para o cliente
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(dropletReq)
+	json.NewEncoder(w).Encode(dropletRes)
 
 }
 

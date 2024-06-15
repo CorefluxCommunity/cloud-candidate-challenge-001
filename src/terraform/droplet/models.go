@@ -24,6 +24,39 @@ terraform {
   }
     
 `
+
+var VariablesModel = `
+variable "api_token" {
+	default = ""
+	type    = string
+  }
+  
+  variable "image" {
+	default = ""
+	type    = string
+  }
+  variable "name" {
+	default = ""
+	type    = string
+  }
+  variable "region" {
+	default = ""
+	type    = string
+  }
+  variable "size" {
+	default = ""
+	type    = string
+  }
+  variable "monitoring" {
+	default = true
+	type    = bool
+  }
+  variable "ipv6" {
+	default = true
+	type    = bool
+  }
+
+`
 var OutputModel = `
 output "droplet_ip_address" {
 	value = digitalocean_droplet.web.ipv4_address
@@ -40,5 +73,5 @@ name       = "%s"
 region     = "%s"
 size       = "%s"
 monitoring = %t
-ipv6       = %t
+ipv6 = %t
 `
