@@ -42,7 +42,15 @@ func (s *DropletService) CreateDroplet(req droplet.DropletRequest) (*droplet.Dro
 
 func (s DropletService) runTerraformInit() error {
 	log.Println("Running terraform init")
+	awsEnv := NewAwsEnv()
 	cmd := exec.Command("terraform", "init")
+	cmd.Env = []string{
+		fmt.Sprintf("AWS_ACCESS_KEY_ID=%s", awsEnv.AccessKeyID),
+		fmt.Sprintf("AWS_SECRET_ACCESS_KEY=%s", awsEnv.SecretAccessKey),
+	}
+	if awsEnv.SessionToken != "" {
+		cmd.Env = append(cmd.Env, fmt.Sprintf("AWS_SESSION_TOKEN=%s", awsEnv.SessionToken))
+	}
 	cmd.Dir = s.Dir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -57,23 +65,13 @@ func (s DropletService) runTerraformApply(req droplet.DropletRequest) error {
 	args := []string{
 		"apply",
 		"-auto-approve",
-		fmt.Sprintf(`
-		-var="api_token=%s"
-		-var="image=%s"
-		-var="name=%s"
-		-var="region=%s"
-		-var="size=%s"
-		-var="monitoring=%t"
-		-var="ipv6=%t"
-		`,
-			req.Token,
-			req.Image,
-			req.Name,
-			req.Region,
-			req.Size,
-			req.Monitoring,
-			req.Ipv6,
-		),
+		fmt.Sprintf(`-var=api_token=%s`, req.Token),
+		fmt.Sprintf(`-var=image=%s`, req.Image),
+		fmt.Sprintf(`-var=name=%s`, req.Name),
+		fmt.Sprintf(`-var=region=%s`, req.Region),
+		fmt.Sprintf(`-var=size=%s`, req.Size),
+		fmt.Sprintf(`-var=monitoring=%t`, req.Monitoring),
+		fmt.Sprintf(`-var=ipv6=%t`, req.Ipv6),
 	}
 	cmd := exec.Command("terraform", args...)
 	log.Printf("Running %s %s", cmd.Path, cmd.Args[3])
