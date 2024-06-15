@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"os/exec"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 // Define each struct according to the variables used in each Terraform module
@@ -36,11 +34,7 @@ var logEvent = log.New(os.Stdout, "", log.LstdFlags)
 // Webserver entrypoint
 // Load the .env file into the Os Environemt Variables (do_token)
 // Set Routes for each endpoint
-func main() {	
-	if err := godotenv.Load(); err != nil {
-		logError.Fatalf("Error loading .env file: %v", err)
-    }
-
+func main() {
 	if err := terraformInit(); err != nil {
 		logError.Fatalf("Error initiating Terraform: %v", err)
 	}
@@ -70,8 +64,9 @@ func terraformInit() error {
 func setupRouter() http.Handler {
 	r := http.NewServeMux()
 
+	// Protect Terraform endpoints with Basic Auth
 	for _, route := range terraformModules {
-		r.HandleFunc("/"+route, handleRoute)
+		r.HandleFunc("/"+route, handleBasicAuth(handleRoute))
 	}
 	return r
 }
@@ -217,4 +212,21 @@ func callTerraformModule(moduleName string, outputChan chan<- string, errChan ch
     outputChan <- string(output)
     
     return nil
+}
+
+func handleBasicAuth(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		username, password, ok := r.BasicAuth()
+		if !ok || !validateCredentials(username, password) {
+			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		next.ServeHTTP(w, r)
+	}
+}
+
+// Validate username and password
+func validateCredentials(username, password string) bool {
+	return username == os.Getenv("go_server_user") && password == os.Getenv("go_server_pass")
 }
