@@ -82,7 +82,12 @@ func handleRoute(w http.ResponseWriter, r *http.Request) {
 	var input interface{}
 	
 	logEvent.Printf("Incoming request: %s %s", r.Method, r.URL.Path)
-
+	
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	
 	for _, module := range terraformModules {
 		if r.URL.Path == "/"+module {
 			moduleName = module
