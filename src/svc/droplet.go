@@ -79,7 +79,7 @@ func (s *DropletService) CleanupTempFiles() {
 }
 
 func (s *DropletService) createDir(req terraform.DropletRequest) error {
-	tempDir, err := os.MkdirTemp("", fmt.Sprintf("droplet-%s-%s", req.Name, req.Region))
+	tempDir, err := os.MkdirTemp("", fmt.Sprintf("droplet-%s-%s-", req.Name, req.Region))
 	if err != nil {
 		return err
 	}
@@ -139,7 +139,7 @@ func (s DropletService) runTerraformInit() error {
 }
 
 func (s DropletService) runTerraformApply() error {
-	varFile := fmt.Sprintf(`-var-file="%s"`, filepath.Join(s.Dir, s.Tfvars))
+	varFile := fmt.Sprintf(`-var-file=%s`, filepath.Join(s.Dir, s.Tfvars))
 	cmd := exec.Command("terraform", "apply", "-auto-approve", varFile)
 	log.Printf("Running %s %s", cmd.Path, cmd.Args[3])
 	cmd.Dir = s.Dir
