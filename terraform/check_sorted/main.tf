@@ -13,7 +13,7 @@ provider "digitalocean" {
 
 data "digitalocean_droplets" "all_droplets" {
   sort {
-    key = "created_at"
+    key = "name"
     direction = var.direction
   }
 }

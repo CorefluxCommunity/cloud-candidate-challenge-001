@@ -1,11 +1,11 @@
-output "droplet_ids" {
-  value = [for droplet in data.digitalocean_droplets.all_droplets.droplets : droplet.id]
+output "sorted_droplet_ids" {
+  value       = data.digitalocean_droplets.all_droplets.droplets[*].id
 }
 
-output "droplet_names" {
-  value = [for droplet in data.digitalocean_droplets.all_droplets.droplets : droplet.name]
+output "sorted_droplet_names" {
+  value       = data.digitalocean_droplets.all_droplets.droplets[*].name
 }
 
-output "droplet_ips" {
-  value = [for droplet in data.digitalocean_droplets.all_droplets.droplets : droplet.ipv4_address]
+output "sorted_droplet_creation_dates" {
+  value       = data.digitalocean_droplets.all_droplets.droplets[*].created_at
 }
