@@ -10,6 +10,16 @@ type DropletRequest struct {
 	Ipv6       bool   `json:"ipv6"`
 }
 
+func (r DropletRequest) IsValid() bool {
+	missingFields := r.Token == "" ||
+		r.Image == "" ||
+		r.Name == "" ||
+		r.Region == "" ||
+		r.Size == ""
+
+	return !missingFields
+}
+
 type DropletResponse struct {
 	Id   string `json:"id"`
 	Ipv4 string `json:"ipv4"`

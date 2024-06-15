@@ -26,6 +26,11 @@ func (c *Controller) PostHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&dropletReq)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !dropletReq.IsValid() {
+		http.Error(w, "invalid input", http.StatusBadRequest)
+		return
 	}
 
 	// responde o output do terraform para o cliente
