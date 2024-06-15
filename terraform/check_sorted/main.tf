@@ -7,6 +7,10 @@ terraform {
   }
 }
 
+provider "digitalocean" {
+  token = var.do_token
+}
+
 data "digitalocean_droplets" "all_droplets" {
   sort {
     key = "created_at"

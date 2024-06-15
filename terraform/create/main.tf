@@ -7,10 +7,15 @@ terraform {
   }
 }
 
+provider "digitalocean" {
+  token = var.do_token
+}
+
 resource "digitalocean_droplet" "web" {
-  name   = var.droplet_name
+  count  = 3
+  name   = "${var.droplet_name}-${count.index}"
   region = var.region
   size   = var.size
   image  = var.image
-  tags   = var.tags
+  tags   = concat(var.tags, [ "droplet${count.index}" ])
 }
