@@ -33,11 +33,11 @@ func (s *DropletService) CreateDroplet(req terraform.DropletRequest) (*terraform
 	if err != nil {
 		return nil, err
 	}
-	err = s.createTfvars(req)
+	err = s.createStaticFiles()
 	if err != nil {
 		return nil, err
 	}
-	err = s.createStaticFiles()
+	err = s.createTfvars(req)
 	if err != nil {
 		return nil, err
 	}
@@ -126,6 +126,7 @@ func (s *DropletService) createStaticFiles() error {
 }
 
 func (s DropletService) runTerraformInit() error {
+	log.Println("Running terraform init")
 	cmd := exec.Command("terraform", "init")
 	cmd.Dir = s.Dir
 	cmd.Stdout = os.Stdout
@@ -138,8 +139,9 @@ func (s DropletService) runTerraformInit() error {
 }
 
 func (s DropletService) runTerraformApply() error {
-	varFile := fmt.Sprintf(`-var-file="%s"`, s.Tfvars)
+	varFile := fmt.Sprintf(`-var-file="%s"`, filepath.Join(s.Dir, s.Tfvars))
 	cmd := exec.Command("terraform", "apply", "-auto-approve", varFile)
+	log.Printf("Running %s %s", cmd.Path, cmd.Args[3])
 	cmd.Dir = s.Dir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
