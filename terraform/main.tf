@@ -9,9 +9,11 @@ terraform {
 
 terraform {
   backend "s3" {
-    bucket = "cloud-challenge-s3-state"
-    key    = "states/terraform.tfstate"
-    region = "eu-west-2"
+    bucket         = "cloud-challenge-s3-state"
+    key            = "states/terraform.tfstate"
+    dynamodb_table = "terraform-state-lock-dynamo"
+    region         = "eu-west-2"
+    encrypt        = true
   }
 }
 
