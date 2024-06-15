@@ -81,6 +81,8 @@ func handleRoute(w http.ResponseWriter, r *http.Request) {
 	var moduleName string
 	var input interface{}
 	
+	logEvent.Printf("Incoming request: %s %s", r.Method, r.URL.Path)
+
 	for _, module := range terraformModules {
 		if r.URL.Path == "/"+module {
 			moduleName = module
@@ -145,10 +147,13 @@ func processRequest(w http.ResponseWriter, r *http.Request, moduleName string, i
         }
     }(moduleName, input, outputChan, errChan)
     
+	logEvent.Printf("Executing Terraform module '%s'...", moduleName)
+
     // Wait for Terraform output or error
     select {
     case output := <-outputChan:
-        w.WriteHeader(http.StatusOK)
+        logEvent.Printf("Terraform module '%s' execution completed!", moduleName)
+		w.WriteHeader(http.StatusOK)
         w.Write([]byte("Terraform execution completed:\n"))
         w.Write([]byte(output)) // Terraform output is sent to client
     case err := <-errChan:
@@ -203,9 +208,8 @@ func callTerraformModule(moduleName string, outputChan chan<- string, errChan ch
         errChan <- err
         return err
     }
+
     outputChan <- string(output)
     
     return nil
 }
-
-
