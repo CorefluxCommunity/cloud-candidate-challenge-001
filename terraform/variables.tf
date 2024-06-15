@@ -1,3 +1,8 @@
+variable "aws_region" {
+  default = "eu-west-2"
+  type    = string
+}
+
 variable "api_token" {
   default = ""
   type    = string

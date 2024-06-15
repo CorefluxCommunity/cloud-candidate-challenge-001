@@ -7,6 +7,14 @@ terraform {
   }
 }
 
+terraform {
+  backend "s3" {
+    bucket = "cloud-challenge-s3-state"
+    key    = "states/terraform.tfstate"
+    region = "eu-west-2"
+  }
+}
+
 provider "digitalocean" {
   token = var.api_token
 }
