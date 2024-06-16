@@ -1,36 +1,112 @@
 # Coreflux Cloud Team - Candidate Challenge 001 (Go and Terraform)
 
-## Overview
+## The challenge
 
-Welcome to the Coreflux Cloud Team candidate challenge 001! In this challenge, you will be tasked with building a small-scale orchestration engine using Go and Terraform. Your goal is to create an HTTP server in Go that processes HTTP requests to provision Terraform resources. This will test your skills in Go, Terraform, asynchronous programming and handling concurrency.
+The challenge was to build a small-scale orchestration engine using Go and Terraform. The engine needed to handle HTTP requests, process them to provision Terraform resources, and return the output as a response. This project aimed to test skills in Go programming, Terraform usage, asynchronous operations, and concurrency handling. Check the challengeREADME.md for detailed information on the challenge.
 
-## Requirements
+## Key Components
 
-- Write a Terraform module using a provider and resource of your choice, but ideally using the DigitalOcean provider. This module must take some variable(s) as input and return some output(s).
-- Go HTTP Server: Implement a basic HTTP server using Go’s net/http package.
-- Request Handling: The server should map each request path to a specific Terraform module.
-- Request Parsing: Design the server to accept JSON input in the HTTP request body and parse it to the Terraform command.
-- Return a Response: Once the Terraform apply returns the output, the server should return it as the response.
+### Terraform Modules:
+* Implemented 3 Terraform modules to be called on certain endpoints, I chose to implement these modules to play around with different functionalities offered by Terraform:
+    * create
+        ```
+        This module creates 3 Droplets and automatically assigns different Tags to each one.
+        Input: Name, Region, Size, Image and Tags
+        Output: Droplets ID, IPv4 Address and Tags
+        ```
+    * search_by_tag
+        ```
+        This module filters the requested data (all Droplets) by Tags.
+        Input: Tags
+        Output: Droplets ID, Name and IPv4 Address.
+        ```
+    * check_sorted 
+        ```
+        This module sorts the requested data (all Droplets) by Name.
+        Input: Sort direction
+        Output: Droplets ID, Name and Creation Date.
+        ```
 
-## Resources
+### Go HTTP Server:
+* Developed a basic HTTP server using Go's net/http package.
+* Mapped each request path to a specific Terraform module.
+* Designed to accept JSON input in the HTTP request body, which contains parameters for Terraform.
 
-- [Go Documentation](https://go.dev/doc/)
-- [Terraform Documentation](https://developer.hashicorp.com/terraform)
-- [Terraform Provider Registry](https://registry.terraform.io)
-- [Terraform DigitalOcean Provider](https://registry.terraform.io/providers/digitalocean/digitalocean/2.39.1)
+### Extra:
+* Implemented a basic authentication mechanism on the webserver.
+* Used Digital Ocean App Platform to deploy the go webserver. This way it automatically assigns and manages TLS certificates and ensures that the application is served securely over HTTPS.
+* Used Terraform for the deployment process.
+* Included several scripts and a Makefile to make deployment and testing more automated.
 
-## Submission
+## Learning and Skills Tested
 
-Please fork this repository and submit your solution as a pull request. Include detailed documentation on how to run your solution and any assumptions or design decisions you made.
-Good luck, and we look forward to reviewing your submission!
+* Go Programming: Developed skills in Go programming, especially on how Go offers good functionality for asynchronous programming.
+* Terraform Usage: Learned about Terraform and infrastructure as code, as well as its declarative configuration and state management.
+* Cloud deployment: Used Terraform with DigitalOcean as a provider to interact programmatically with DigitalOcean resources, including Droplets and App Platform.
 
-## Extra credit - If you really want to stand out
+## How to Use
+### Prerequisites
 
-Add some auth mechanism to your server and deploy it on the cloud. Ensure it uses TLS with an ACME cert. Extra extra bonus points if your deployment is done using Terraform ;)
+Ensure you have the following:
+* [Terraform](https://developer.hashicorp.com/terraform/install?product_intent=terraform)
+* [Make utility](https://www.gnu.org/software/make/#download)
+* [DigitalOcean API Token](https://cloud.digitalocean.com/account/api/tokens)
 
-## Claim 200$ of DigitalOcean Credits
+### Main commands
+#### Deploy the App to DigitalOcean's App Platform
 
-If you want to use DigitalOcean for this challenge, you can claim 200$ of DigitialOcean credits by clicking on the button below.
+```
+make all
+```
+* Will prompt you for your DigitalOcean API token and to set a username and a password for the webserver.
 
-[![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%203.svg)](https://www.digitalocean.com/?refcode=dbb46c5fa238&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
+#### Execute tests to verify the functionality of the web server::
+```
+make test
+```
+* Will prompt you for the URL of the deployed APP (you can get it from the output of the make all command), username and password to access the webserver.
+* This command will test all endpoints in succession and also an Unauthorized access to make sure authentication is working.
 
+### Other options
+#### Generate terraform.tfvars File required for Terraform variables
+```
+make vars
+```
+
+#### Initialize Terraform in the deployment directory (deploy)
+```
+make init
+```
+
+#### To see the execution plan without making any changes, run
+```
+make plan
+```
+
+#### Deploy the go-webserver application to DigitalOcean App Platform. This command also applies changes automatically:
+```
+make apply
+```
+#### Update the Docker Hub repository with the most recent changes to the go-webserver (if applicable)
+```
+make update_image
+```
+
+#### Remove generated terraform.tfvars file
+```
+make clean
+```
+
+#### Completely clean up Terraform files (including state files, lock files, and temporary outputs):
+
+``` 
+make fclean
+```
+
+### Further testing
+If you want to further test the deployed webserver you can issue your own curl requests:
+```
+curl -u <USERNAME>:<PASSWORD> -X POST <APP_URL>/<ENDPOINT> \
+-H "Content-Type: application/json" \
+-d '{<ADJUST ACCORDINGLY>}'
+```
