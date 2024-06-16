@@ -29,6 +29,7 @@ func (c *DropletController) GetHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (c *DropletController) PostHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	// Recebe as configuraçoes para criar uma instancia no digital ocean em json e chama o serviço que se comunica com o terraform
 	var dropletReq droplet.DropletRequest
 	err := json.NewDecoder(r.Body).Decode(&dropletReq)
@@ -44,14 +45,23 @@ func (c *DropletController) PostHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// responde o output do terraform para o cliente
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(dropletRes)
+	err = json.NewEncoder(w).Encode(dropletRes)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 
 }
 
 func (c *DropletController) DeleteHandler(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "Hello from Destroy")
+	w.Header().Set("Content-Type", "application/json")
 	// recebe o ID do serviço que deseja remover
+	output, err := c.DropletService.DeleteDroplet()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	err = json.NewEncoder(w).Encode(output)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 
-	// responde com o output do terraform
 }

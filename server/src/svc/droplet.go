@@ -58,6 +58,27 @@ func (s *DropletService) CreateDroplet(req droplet.DropletRequest) (*droplet.Dro
 
 }
 
+func (s DropletService) DeleteDroplet() ([]byte, error) {
+	outputCh := make(chan []byte, 1)
+	errCh := make(chan error)
+
+	go func() {
+		output, err := s.runTerraformDestroy()
+		if err != nil {
+			errCh <- err
+			return
+		}
+		outputCh <- output
+	}()
+
+	select {
+	case err := <-errCh:
+		return nil, err
+	case output := <-outputCh:
+		return output, nil
+	}
+}
+
 func (s DropletService) runTerraformInit() error {
 	log.Println("Running terraform init")
 	awsEnv := NewAwsEnv()
@@ -93,7 +114,6 @@ func (s DropletService) runTerraformApply(req droplet.DropletRequest) error {
 		fmt.Sprintf(`-var=ipv6=%t`, req.Ipv6),
 	}
 	cmd := exec.Command("terraform", args...)
-	log.Printf("Running %s %s", cmd.Path, cmd.Args[3])
 	cmd.Dir = s.dir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -104,10 +124,29 @@ func (s DropletService) runTerraformApply(req droplet.DropletRequest) error {
 	return nil
 }
 
+func (s DropletService) runTerraformDestroy() ([]byte, error) {
+	log.Println("Running terraform apply -destroy")
+	cmd := exec.Command("terraform", "apply", "-auto-approve", "-destroy")
+	cmd.Dir = s.dir
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		return nil, err
+	}
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, err
+	}
+	return output, nil
+}
+
 func (s DropletService) terraformOutput() (*droplet.DropletResponse, error) {
 	log.Println("Running terraform output")
 	cmd := exec.Command("terraform", "output", "-json")
 	cmd.Dir = s.dir
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, err
