@@ -1,7 +1,6 @@
 package droplet
 
 type DropletRequest struct {
-	Token      string `json:"api_token"`
 	Image      string `json:"image"`
 	Name       string `json:"name"`
 	Region     string `json:"region"`
@@ -11,8 +10,7 @@ type DropletRequest struct {
 }
 
 func (r DropletRequest) IsValid() bool {
-	missingFields := r.Token == "" ||
-		r.Image == "" ||
+	missingFields := r.Image == "" ||
 		r.Name == "" ||
 		r.Region == "" ||
 		r.Size == ""
