@@ -20,11 +20,11 @@ func NewDropletController() *DropletController {
 }
 
 func (c DropletController) registerRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("GET /droplet", c.HealthCheck)
+	mux.HandleFunc("GET /droplet", c.GetHandler)
 	mux.HandleFunc("POST /droplet", c.PostHandler)
 	mux.HandleFunc("DELETE /droplet", c.DeleteHandler)
 }
-func (c *DropletController) HealthCheck(w http.ResponseWriter, _ *http.Request) {
+func (c *DropletController) GetHandler(w http.ResponseWriter, _ *http.Request) {
 	io.WriteString(w, "Health check ok")
 }
 

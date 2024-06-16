@@ -11,25 +11,24 @@ import (
 )
 
 type DropletService struct {
-	Dir    string
+	dir    string
 	Main   string
 	Output string
 	Tfvars string
 }
 
 func NewDropletService() *DropletService {
-	return &DropletService{Dir: "../terraform"}
+	return &DropletService{dir: "../terraform"}
 }
 
 func (s *DropletService) CreateDroplet(req droplet.DropletRequest) (*droplet.DropletResponse, error) {
 	log.Println("Creating DigitalOcean Droplet")
 	var err error
 	if !req.IsValid() {
-		return nil, fmt.Errorf("invalid request")
+		return nil, fmt.Errorf("invalid or missing request fields")
 	}
 	errCh := make(chan error, 1)
 	resCh := make(chan *droplet.DropletResponse, 1)
-
 	go func() {
 		defer close(errCh)
 		defer close(resCh)
@@ -43,17 +42,13 @@ func (s *DropletService) CreateDroplet(req droplet.DropletRequest) (*droplet.Dro
 			errCh <- err
 			return
 		}
-
 		res, err := s.terraformOutput()
 		if err != nil {
 			errCh <- err
 			return
 		}
-
 		resCh <- res
-
 	}()
-
 	select {
 	case err := <-errCh:
 		return nil, err
@@ -74,7 +69,7 @@ func (s DropletService) runTerraformInit() error {
 	if awsEnv.SessionToken != "" {
 		cmd.Env = append(cmd.Env, fmt.Sprintf("AWS_SESSION_TOKEN=%s", awsEnv.SessionToken))
 	}
-	cmd.Dir = s.Dir
+	cmd.Dir = s.dir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
@@ -85,6 +80,7 @@ func (s DropletService) runTerraformInit() error {
 }
 
 func (s DropletService) runTerraformApply(req droplet.DropletRequest) error {
+	log.Println("Running terraform apply")
 	args := []string{
 		"apply",
 		"-auto-approve",
@@ -98,7 +94,7 @@ func (s DropletService) runTerraformApply(req droplet.DropletRequest) error {
 	}
 	cmd := exec.Command("terraform", args...)
 	log.Printf("Running %s %s", cmd.Path, cmd.Args[3])
-	cmd.Dir = s.Dir
+	cmd.Dir = s.dir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
@@ -109,8 +105,9 @@ func (s DropletService) runTerraformApply(req droplet.DropletRequest) error {
 }
 
 func (s DropletService) terraformOutput() (*droplet.DropletResponse, error) {
+	log.Println("Running terraform output")
 	cmd := exec.Command("terraform", "output", "-json")
-	cmd.Dir = s.Dir
+	cmd.Dir = s.dir
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, err
