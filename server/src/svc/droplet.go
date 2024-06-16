@@ -27,17 +27,40 @@ func (s *DropletService) CreateDroplet(req droplet.DropletRequest) (*droplet.Dro
 	if !req.IsValid() {
 		return nil, fmt.Errorf("invalid request")
 	}
+	errCh := make(chan error, 1)
+	resCh := make(chan *droplet.DropletResponse, 1)
 
-	err = s.runTerraformInit()
-	if err != nil {
+	go func() {
+		defer close(errCh)
+		defer close(resCh)
+		err = s.runTerraformInit()
+		if err != nil {
+			errCh <- err
+			return
+		}
+		err = s.runTerraformApply(req)
+		if err != nil {
+			errCh <- err
+			return
+		}
+
+		res, err := s.terraformOutput()
+		if err != nil {
+			errCh <- err
+			return
+		}
+
+		resCh <- res
+
+	}()
+
+	select {
+	case err := <-errCh:
 		return nil, err
-	}
-	err = s.runTerraformApply(req)
-	if err != nil {
-		return nil, err
+	case res := <-resCh:
+		return res, nil
 	}
 
-	return s.terraformOutput()
 }
 
 func (s DropletService) runTerraformInit() error {
