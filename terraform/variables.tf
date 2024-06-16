@@ -1,27 +1,31 @@
+// Variables have a irrelevant default due to a terrform issue that demands to variables to be passed when using the destroy command. 
+// To workaraound all variables must have a default value, an empty string does not count.
+// To avoid an unwanted droplet creation in case the user forget an config variable i chose not to provide useful default values and threat the error instead.
+
 variable "aws_region" {
   default = "eu-west-2"
   type    = string
 }
 
 variable "api_token" {
-  default = ""
+  default = "default"
   type    = string
 }
 
 variable "image" {
-  default = ""
+  default = "default"
   type    = string
 }
 variable "name" {
-  default = ""
+  default = "default"
   type    = string
 }
 variable "region" {
-  default = ""
+  default = "default"
   type    = string
 }
 variable "size" {
-  default = ""
+  default = "default"
   type    = string
 }
 variable "monitoring" {

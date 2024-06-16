@@ -4,3 +4,4 @@ planejamento.txt
 *.tfstate
 *.terraform
 *.backup
+.env

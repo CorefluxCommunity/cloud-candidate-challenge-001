@@ -55,13 +55,10 @@ func (c *DropletController) PostHandler(w http.ResponseWriter, r *http.Request) 
 func (c *DropletController) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	// recebe o ID do serviço que deseja remover
-	output, err := c.DropletService.DeleteDroplet()
+	err := c.DropletService.DeleteDroplet()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	err = json.NewEncoder(w).Encode(output)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	w.Write([]byte("Droplet Deleted sucessfully"))
 
 }

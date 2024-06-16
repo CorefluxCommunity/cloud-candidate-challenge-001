@@ -58,25 +58,26 @@ func (s *DropletService) CreateDroplet(req droplet.DropletRequest) (*droplet.Dro
 
 }
 
-func (s DropletService) DeleteDroplet() ([]byte, error) {
-	outputCh := make(chan []byte, 1)
+func (s DropletService) DeleteDroplet() error {
 	errCh := make(chan error)
 
 	go func() {
-		output, err := s.runTerraformDestroy()
+		err := s.runTerraformInit()
 		if err != nil {
 			errCh <- err
 			return
 		}
-		outputCh <- output
+		err = s.runTerraformDestroy()
+		if err != nil {
+			errCh <- err
+			return
+		}
+		errCh <- nil
 	}()
 
-	select {
-	case err := <-errCh:
-		return nil, err
-	case output := <-outputCh:
-		return output, nil
-	}
+	err := <-errCh
+	return err
+
 }
 
 func (s DropletService) runTerraformInit() error {
@@ -105,10 +106,11 @@ func (s DropletService) runTerraformInit() error {
 
 func (s DropletService) runTerraformApply(req droplet.DropletRequest) error {
 	log.Println("Running terraform apply")
+	token := os.Getenv("DIGITALOCEAN_API_TOKEN")
 	args := []string{
 		"apply",
 		"-auto-approve",
-		fmt.Sprintf(`-var=api_token=%s`, req.Token),
+		fmt.Sprintf(`-var=api_token=%s`, token),
 		fmt.Sprintf(`-var=image=%s`, req.Image),
 		fmt.Sprintf(`-var=name=%s`, req.Name),
 		fmt.Sprintf(`-var=region=%s`, req.Region),
@@ -122,28 +124,30 @@ func (s DropletService) runTerraformApply(req droplet.DropletRequest) error {
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		log.Println("Error running terraform apply")
+		log.Printf("Error running creating droplet: %s", err.Error())
 		return err
 	}
 	return nil
 }
 
-func (s DropletService) runTerraformDestroy() ([]byte, error) {
+func (s DropletService) runTerraformDestroy() error {
 	log.Println("Running terraform apply -destroy")
-	cmd := exec.Command("terraform", "apply", "-auto-approve", "-destroy")
+	token := os.Getenv("DIGITALOCEAN_API_TOKEN")
+	args := []string{
+		"destroy",
+		"-auto-approve",
+		fmt.Sprintf("-var=api_token=%s", token),
+	}
+	cmd := exec.Command("terraform", args...)
 	cmd.Dir = s.dir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		return nil, err
+		log.Printf("Error running terraform apply -destroy\n%s", err.Error())
+		return err
 	}
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Println("Error running terraform apply -destroy")
-		return nil, err
-	}
-	return output, nil
+	return nil
 }
 
 func (s DropletService) terraformOutput() (*droplet.DropletResponse, error) {
