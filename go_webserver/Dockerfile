@@ -17,13 +17,13 @@ WORKDIR /app
 # Copy the Go source code into the container
 COPY . .
 
+# Set the working directory inside the container
+WORKDIR /app/src
+
 # Build the Go application
 RUN go mod download
 
 RUN go build -o /go_webserver
-
-# Expose the port your application listens on
-EXPOSE 8080
 
 # Command to run the application
 CMD ["/go_webserver"]

@@ -18,15 +18,15 @@ resource "digitalocean_app" "go-webserver" {
 
 	env {
 		key = "do_token"
-		value = "yourAPItoken"
+		value = var.do_token
 	}
 	env {
 		key = "go_server_user"
-		value = "youruser"
+		value = var.go_server_user
 	}
 	env {
 		key = "go_server_pass"
-		value = "yourpassword"
+		value = var.go_server_pass
 	}
 
 	service {
