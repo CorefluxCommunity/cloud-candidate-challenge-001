@@ -25,4 +25,12 @@ type DropletResponse struct {
 	Ipv4 struct {
 		Value string `json:"value"`
 	} `json:"droplet_ip_address"`
+
+	Status struct {
+		Value string `json:"value"`
+	} `json:"droplet_status"`
+
+	CreatedAt struct {
+		Value string `json:"value"`
+	} `json:"droplet_created_at"`
 }
