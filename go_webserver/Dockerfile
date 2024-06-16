@@ -16,6 +16,8 @@ WORKDIR /app
 
 # Copy the Go source code into the container
 COPY . .
+RUN  chmod +x ./terraform_init.sh
+RUN  ./terraform_init.sh
 
 # Set the working directory inside the container
 WORKDIR /app/src

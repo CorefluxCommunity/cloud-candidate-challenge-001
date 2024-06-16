@@ -15,10 +15,6 @@ var logEvent = log.New(os.Stdout, "", log.LstdFlags)
 // Webserver entrypoint
 // Set Routes for each endpoint
 func main() {
-	if err := terraformInit(); err != nil {
-		logError.Fatalf("Error initiating Terraform: %v", err)
-	}
-	
 	r := setupRouter()
 
 	logEvent.Println("Starting server on :8080...")

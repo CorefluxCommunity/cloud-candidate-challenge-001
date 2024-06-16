@@ -6,21 +6,6 @@ import (
 	"os/exec"
 )
 
-// Init all terraform modules before routing to ensure everything is prepared for any request
-func terraformInit() error {
-	for _, dir := range terraformModules {
-		cmd := exec.Command("terraform", "init")
-		cmd.Dir = "../terraform/" + dir
-
-		if err := cmd.Run(); err != nil {
-			logEvent.Printf("Terraform init failed in directory %s: %v", dir, err)
-			return err
-		}
-	}
-
-	return nil
-}
-
 // Sets the needed Environment Variables according to the type of request
 func setEnvironmentVariables(input interface{}) error {
 	os.Setenv("TF_VAR_do_token", os.Getenv("do_token"))
