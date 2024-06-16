@@ -83,10 +83,12 @@ func (s DropletService) runTerraformInit() error {
 	log.Println("Running terraform init")
 	awsEnv := NewAwsEnv()
 	cmd := exec.Command("terraform", "init")
-	cmd.Env = []string{
+	cmd.Env = append(
+		cmd.Env,
 		fmt.Sprintf("AWS_ACCESS_KEY_ID=%s", awsEnv.AccessKeyID),
 		fmt.Sprintf("AWS_SECRET_ACCESS_KEY=%s", awsEnv.SecretAccessKey),
-	}
+	)
+
 	if awsEnv.SessionToken != "" {
 		cmd.Env = append(cmd.Env, fmt.Sprintf("AWS_SESSION_TOKEN=%s", awsEnv.SessionToken))
 	}
@@ -95,6 +97,7 @@ func (s DropletService) runTerraformInit() error {
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
+		log.Println("Error running Terraform Init")
 		return err
 	}
 	return nil
@@ -119,6 +122,7 @@ func (s DropletService) runTerraformApply(req droplet.DropletRequest) error {
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
+		log.Println("Error running terraform apply")
 		return err
 	}
 	return nil
@@ -136,6 +140,7 @@ func (s DropletService) runTerraformDestroy() ([]byte, error) {
 	}
 	output, err := cmd.CombinedOutput()
 	if err != nil {
+		log.Println("Error running terraform apply -destroy")
 		return nil, err
 	}
 	return output, nil
@@ -145,10 +150,9 @@ func (s DropletService) terraformOutput() (*droplet.DropletResponse, error) {
 	log.Println("Running terraform output")
 	cmd := exec.Command("terraform", "output", "-json")
 	cmd.Dir = s.dir
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 	output, err := cmd.Output()
 	if err != nil {
+		log.Println("Error running terraform output")
 		return nil, err
 	}
 	var dropletResponse droplet.DropletResponse
