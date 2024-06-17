@@ -13,7 +13,7 @@ provider "digitalocean" {
 
 resource "digitalocean_droplet" "web" {
   count  = 3
-  name   = "${var.droplet_name}-${count.index}"
+  name   = "${var.droplet_name}-droplet-${count.index}"
   region = var.region
   size   = var.size
   image  = var.image

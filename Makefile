@@ -5,7 +5,7 @@ GREEN 	= \033[1;32m
 
 # Variables
 TERRAFORM_DIR = deploy
-WEBSERVER_DIR = go_webserver
+WEBSERVER_DIR = app
 
 # Commands
 all: vars init apply
@@ -32,7 +32,7 @@ destroy:
 
 update_image:
 	@echo "$(GREEN)Updating Docker Hub repository with the most recent changes...$(RESET)"
-	@cd $(WEBSERVER_DIR) && ../scripts/update_image.sh
+	@./scripts/update_image.sh
 
 test:
 	@echo "$(GREEN)Testing webserver...$(RESET)"

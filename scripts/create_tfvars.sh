@@ -5,8 +5,8 @@ if [ -f terraform.tfvars ]; then
     echo "terraform.tfvars already exists. Do you want to overwrite it? (yes/no)"
     read response
     if [ "$response" != "yes" ]; then
-        echo "Aborting."
-        exit 1
+        echo "Proceeding with existing information..."
+        exit 0
     fi
 fi
 

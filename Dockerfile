@@ -15,12 +15,11 @@ RUN wget https://releases.hashicorp.com/terraform/0.15.5/terraform_0.15.5_linux_
 WORKDIR /app
 
 # Copy the Go source code into the container
-COPY . .
+COPY ./app .
+COPY ./scripts/terraform_init.sh .
 RUN  chmod +x ./terraform_init.sh
 RUN  ./terraform_init.sh
 
-# Set the working directory inside the container
-WORKDIR /app/src
 
 # Build the Go application
 RUN go mod download

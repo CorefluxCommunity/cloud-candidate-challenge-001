@@ -6,7 +6,7 @@ variable "do_token" {
 variable "droplet_name" {
   description = "Name of the Droplet"
   type        = string
-  default     = "new_droplet"
+  default     = "new"
 }
 
 variable "region" {

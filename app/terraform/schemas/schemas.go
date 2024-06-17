@@ -1,4 +1,4 @@
-package main
+package schemas
 
 type CreateRequest struct {
 	DropletName string   `json:"droplet_name"`
