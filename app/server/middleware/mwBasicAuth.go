@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// Handles the Basic authentication to the server
 func MwBasicAuth(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request,) {
 		username, password, ok := r.BasicAuth()

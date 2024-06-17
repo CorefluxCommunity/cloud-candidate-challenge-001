@@ -7,6 +7,7 @@ import (
 	"go_webserver/loggers"
 )
 
+// Start the server by setting up the router
 func Start() {
 	server := http.NewServeMux()
 
