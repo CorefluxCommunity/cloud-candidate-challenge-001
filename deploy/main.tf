@@ -22,8 +22,15 @@ resource "digitalocean_app" "go-server" {
       environment_slug   = "go"
       instance_count     = 1
       instance_size_slug = "professional-xs"
+      http_port          = 8000
 
 
+      health_check {
+        initial_delay_seconds = 10
+        period_seconds        = 30
+        timeout_seconds       = 5
+        failure_threshold     = 3
+      }
       env {
         key   = "JWK_URL"
         value = var.JWK_URL
