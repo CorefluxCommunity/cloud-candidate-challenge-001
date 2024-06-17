@@ -1,0 +1,5 @@
+*.env
+*.txt
+*.md
+go.sum
+.gitignore
