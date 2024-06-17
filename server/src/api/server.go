@@ -23,7 +23,7 @@ func (s *server) Start() error {
 
 	server := http.Server{
 		Addr:    s.addr,
-		Handler: mux,
+		Handler: authMiddlewareHandler(mux),
 	}
 	log.Println("Starting server on", s.addr)
 	return server.ListenAndServe()
