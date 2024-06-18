@@ -107,9 +107,13 @@ func (s DropletService) runTerraformInit() error {
 func (s DropletService) runTerraformApply(req droplet.DropletRequest) error {
 	log.Println("Running terraform apply")
 	token := os.Getenv("DIGITALOCEAN_API_TOKEN")
+	bucketName := os.Getenv("BUCKET_NAME")
+	awsRegion := os.Getenv("AWS_REGION")
 	args := []string{
 		"apply",
 		"-auto-approve",
+		fmt.Sprintf(`-var=bucket_name=%s`, bucketName),
+		fmt.Sprintf(`-var=aws_region=%s`, awsRegion),
 		fmt.Sprintf(`-var=api_token=%s`, token),
 		fmt.Sprintf(`-var=image=%s`, req.Image),
 		fmt.Sprintf(`-var=name=%s`, req.Name),

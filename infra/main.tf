@@ -21,11 +21,12 @@ provider "digitalocean" {
 }
 
 module "digitalocean_app" {
-  source                = "./modules/digitalocean"
-  AWS_ACCESS_KEY_ID     = var.AWS_ACCESS_KEY_ID
-  AWS_SECRET_ACCESS_KEY = var.AWS_SECRET_ACCESS_KEY
-  AWS_REGION            = var.AWS_REGION
-  COGNITO_ISSUER        = var.COGNITO_ISSUER
-  JWK_URL               = var.JWK_URL
+  source                 = "./modules/digitalocean"
+  AWS_ACCESS_KEY_ID      = var.AWS_ACCESS_KEY_ID
+  AWS_SECRET_ACCESS_KEY  = var.AWS_SECRET_ACCESS_KEY
+  AWS_REGION             = var.AWS_REGION
+  COGNITO_ISSUER         = var.COGNITO_ISSUER
+  JWK_URL                = var.JWK_URL
+  DIGITALOCEAN_API_TOKEN = var.DIGITALOCEAN_API_TOKEN
 }
 

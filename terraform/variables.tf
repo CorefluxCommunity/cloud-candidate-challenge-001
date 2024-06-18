@@ -2,15 +2,27 @@
 // To workaraound all variables must have a default value, an empty string does not count.
 // To avoid an unwanted droplet creation in case the user forget an config variable i chose not to provide useful default values and threat the error instead.
 
-variable "aws_region" {
-  default = "eu-west-2"
-  type    = string
-}
+
+// Env Variables 
 
 variable "api_token" {
   default = "default"
   type    = string
 }
+
+variable "aws_region" {
+  default = "eu-west-2"
+  type    = string
+}
+
+variable "bucket_name" {
+  type    = string
+  default = "cloud-challenge-s3-state"
+
+}
+
+
+// Droplet variables provided by the user
 
 variable "image" {
   default = "default"

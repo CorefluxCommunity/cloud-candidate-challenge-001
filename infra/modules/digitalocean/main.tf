@@ -18,6 +18,10 @@ resource "digitalocean_app" "go-server" {
         failure_threshold     = 3
       }
       env {
+        key   = "DIGITALOCEAN_API_TOKEN"
+        value = var.DIGITALOCEAN_API_TOKEN
+      }
+      env {
         key   = "BUCKET_NAME"
         value = var.module.coreflux.bucket_name
       }

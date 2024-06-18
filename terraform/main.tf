@@ -9,10 +9,10 @@ terraform {
 
 terraform {
   backend "s3" {
-    bucket         = "cloud-challenge-s3-state"
+    bucket         = var.bucket_name
     key            = "states/terraform.tfstate"
     dynamodb_table = "terraform-state-lock-dynamo"
-    region         = "eu-west-2"
+    region         = var.aws_region
     encrypt        = true
   }
 }
