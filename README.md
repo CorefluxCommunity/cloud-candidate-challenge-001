@@ -76,8 +76,8 @@ Our Terraform configuration is organized into a clear hierarchy to manage infras
 
 ### Modules Directory
 - **aws/:** This directory contains sub-modules related to AWS services.
-- **modules/s3/main.tf:** Manages the creation and configuration of S3 buckets. It is responsible for defining bucket properties and policies.
-- **modules/dynamodb/main.tf:** Handles the creation and setup of the DynamoDB table responsible for persisting the state lock ID of the API created droplets.
+- **aws/modules/s3/main.tf:** Manages the creation and configuration of S3 buckets. It is responsible for defining bucket properties and policies.
+- **aws/modules/dynamodb/main.tf:** Handles the creation and setup of the DynamoDB table responsible for persisting the state and the lock ID of the API created droplets.
 - **digitalocean/:** Contains the configuration for deploying the server resources on Digital Ocean.
 
 Inside the ./infra folder, run the following three commands:
