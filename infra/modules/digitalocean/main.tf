@@ -1,17 +1,3 @@
-terraform {
-  required_providers {
-    digitalocean = {
-      source  = "digitalocean/digitalocean"
-      version = "2.39.1"
-    }
-  }
-}
-
-provider "digitalocean" {
-  token = var.DIGITALOCEAN_API_TOKEN
-}
-
-
 resource "digitalocean_app" "go-server" {
   spec {
     name   = "orchestration-engine"
@@ -32,6 +18,10 @@ resource "digitalocean_app" "go-server" {
         failure_threshold     = 3
       }
       env {
+        key   = "BUCKET_NAME"
+        value = var.module.coreflux.bucket_name
+      }
+      env {
         key   = "JWK_URL"
         value = var.JWK_URL
       }
@@ -46,6 +36,11 @@ resource "digitalocean_app" "go-server" {
       env {
         key   = "AWS_ACCESS_KEY_ID"
         value = var.AWS_ACCESS_KEY_ID
+      }
+      env {
+        key   = "AWS_REGION"
+        value = var.AWS_REGION
+
       }
       image {
         registry_type = "DOCR"

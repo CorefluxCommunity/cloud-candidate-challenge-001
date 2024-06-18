@@ -1,6 +1,6 @@
-*.env
-*.txt
-*.md
-go.sum
+**/*.env
+**/*.txt
+**/*.md
+**/go.sum
 .gitignore
-/deploy
+/infra
