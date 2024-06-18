@@ -1,22 +1,22 @@
 # Index
 
-1. [Cloud Backend Challenge](#cloud-backend-challenge)
-   1. [Goal](#goal)
-   2. [Deploying on Digital Ocean](#deploying-on-digital-ocean)
-      1. [Deploy Considerations](#deploy-considerations)
-      2. [Deployment Process](#deployment-process)
-   3. [Folder Structure and Module Interaction](#folder-structure-and-module-interaction)
-      1. [Root Directory](#root-directory)
-      2. [Modules Directory](#modules-directory)
-   4. [Running Locally](#running-locally)
-      1. [Docker](#docker)
-      2. [Go Build](#go-build)
-   5. [API](#api)
-      1. [Feature Design and Reasoning](#feature-design-and-reasoning)
-      2. [POST /droplet](#post-droplet)
-      3. [DELETE /droplet](#delete-droplet)
-   6. [Authentication and Authorization](#authentication-and-authorization)
-      1. [Design and Reasoning](#design-and-reasoning)
+
+1. [Goal](#goal)
+2. [Deploying on Digital Ocean](#deploying-on-digital-ocean)
+   1. [Deploy Considerations](#deploy-considerations)
+   2. [Deployment Process](#deployment-process)
+3. [Folder Structure and Module Interaction](#folder-structure-and-module-interaction)
+   1. [Root Directory](#root-directory)
+   2. [Modules Directory](#modules-directory)
+4. [API](#api)
+   1. [Feature Design and Reasoning](#feature-design-and-reasoning)
+   2. [POST /droplet](#post-droplet)
+   3. [DELETE /droplet](#delete-droplet)
+5. [Authentication and Authorization](#authentication-and-authorization)
+   1. [Design and Reasoning](#design-and-reasoning)
+6. [Running Locally](#running-locally)
+   1. [Docker](#docker)
+   2. [Go Build](#go-build)
 
 # Cloud Backend Challenge
 
@@ -91,6 +91,106 @@ terraform plan
 terraform apply --auto-aprove
 ```
 
+## API
+
+
+### Feature design and reasoning
+One of the goals of the exercise was to provide an API to provision Terraform resources. Each API route should point to a single module. I chose to create a Droplet module because I believe the objective is to build a proof of concept that can be later adapted to different needs. Since no particular use case was presented, a single Droplet should suffice.
+
+That said, I thought it was better to build a solution with a few considerations:
+- Multiple users from the same organization can interact with the module.
+- Concurrent calls to the same module can happen.
+
+With that in mind, I decided to host the Terraform state in an S3 bucket so the state can be easily accessed and locked when it is currently being altered. For that, Terraform also needs a DynamoDB table to keep a record of the locked IDs, preventing concurrent operations and thus avoiding data loss.
+
+Setting up this mechanism can ensure the API can scale if needed and is concurrent safe.
+All endpoints required authorization to access. Auth is handled by AWS Cognito using client credentials. With the proper credentials one must authenticate with cognito to obtain a access token valid for 1 hour. That token must be provided in an Authentication header to access all routes. Further explanation on the [Auth](#authentication-and-authorization) section of this document.
+
+Currently, the design is limited to a single-tenant solution. Each API route is connected to a specific module and state, meaning that each call to the route acts on the same droplet.
+
+To implement a multi-tenant solution, where multiple users can manage their own instances, a more complex system would be required. This system would need database integration and a different authentication model to manage separate user sessions.
+
+The reasoning behind this decision is based on the complexity and time limitations given the number of proposed features. To deliver a functional proof of concept that can be further enhanced to accommodate more features, I chose to develop a single-tenant solution.
+
+This approach ensures that the project remains manageable and deliverable within the constraints, while providing a solid foundation for future enhancements to support multi-tenancy.
+
+### POST /droplet
+
+**Description:** Create a droplet instance on Digital Ocean using Terraform and the provided configuration input.
+
+**Accepted Data:**
+- `image`: Operating System Image to be installed on virtual machine (STRING) (REQUIRED)
+- `name`: Unique Hostname to refer to your virtual machine (STRING) (REQUIRED)
+- `region`: Region where your VM will be deployed (STRING) (REQUIRED)
+- `size`: Size of memory and compute resources (STRING) (REQUIRED)
+- `monitoring`: Collect and graph expanded system-level metrics, track performance, and set up alerts instantly within the control panel (BOOLEAN) (DEFAULT FALSE)
+- `ipv6`: Whether to provide an IPv6 address (BOOLEAN) (DEFAULT FALSE)
+
+**Example JSON input:**
+```json
+{
+  "image": "ubuntu-24-04-x64",
+  "name": "test",
+  "region": "lon1",
+  "size": "s-1vcpu-1gb",
+  "monitoring": true,
+  "ipv6": true
+}
+```
+
+**Request Example**
+```sh
+curl --location 'https://orchestration-engine-5k24y.ondigitalocean.app/drople' --header 'Authorization: Bearer <ACCESS_TOKEN>' --header 'Content-Type: application/json' --data '{
+    "image": "ubuntu-24-04-x64",
+    "name": "test1",
+    "region": "nyc1",
+    "size": "s-1vcpu-1gb",
+    "monitoring": true,
+    "ipv6": true
+}'
+
+```
+
+
+**Returned Data:**
+- `droplet_id`: Unique identifier of the droplet instance created (STRING)
+- `droplet_ip_address`: IPv4 address of the droplet instance created (STRING)
+- `droplet_status`: Status of the Droplet (STRING)
+- `droplet_created_at`: Creation date of the Droplet (STRING)
+
+
+### DELETE /droplet
+
+**Description:** Destroy the droplet using Terraform's `-destroy` flag.
+
+This endpoint will destroy the droplet provisioned by the POST /droplet endpoint.
+
+**Request Example**
+```sh
+curl --location --request DELETE 'https://orchestration-engine-5k24y.ondigitalocean.app/drople' --header 'Authorization: Bearer <ACCESS_TOKEN>'
+
+```
+
+## Authentication and Authorization
+
+
+
+### Design and Reasoning
+
+Authentication is handled by AWS Cognito using the client credentials grant type with machine-to-machine authentication flow.
+
+I chose the client credentials grant type because I am developing a single-tenant solution where a shared credential can be used across the team. This approach simplifies access management within the organization. It's crucial to note that using the client credentials grant type requires trusting the client application. For a multi-tenant solution or when dealing with untrusted users, I would opt for the authorization code grant, which provides a more secure authentication flow.
+
+**Current Authentication Flow:**
+1. **Client Registration:** Users are provided with a `client_id` and `client_secret` by the User Pool Admin.
+   
+2. **Authentication:** Users authenticate with the AWS Cognito User Pool using these credentials and receive an access token in return.
+
+3. **Access Token:** The access token is valid for 1 hour and must be passed with every request in the `Authorization` header of the request, formatted as `Authorization: Bearer <ACCESS_TOKEN>`.
+
+This authentication mechanism ensures secure access to the API endpoints while maintaining simplicity and cost-effectiveness during development and testing phases.
+
+
 
 ## Running Locally
 
@@ -147,84 +247,5 @@ go run main.go
 ```
 
 
-## API
-
-
-### Feature design and reasoning
-One of the goals of the exercise was to provide an API to provision Terraform resources. Each API route should point to a single module. I chose to create a Droplet module because I believe the objective is to build a proof of concept that can be later adapted to different needs. Since no particular use case was presented, a single Droplet should suffice.
-
-That said, I thought it was better to build a solution with a few considerations:
-- Multiple users from the same organization can interact with the module.
-- Concurrent calls to the same module can happen.
-
-With that in mind, I decided to host the Terraform state in an S3 bucket so the state can be easily accessed and locked when it is currently being altered. For that, Terraform also needs a DynamoDB table to keep a record of the locked IDs, preventing concurrent operations and thus avoiding data loss.
-
-Setting up this mechanism can ensure the API can scale if needed and is concurrent safe.
-All endpoints required authorization to access. Auth is handled by AWS Cognito using client credentials. With the proper credentials one must authenticate with cognito to obtain a access token valid for 1 hour. That token must be provided in an Authentication header to access all routes. Further explanation on the [Auth](#authentication-and-authorization) section of this document.
-
-Currently, the design is limited to a single-tenant solution. Each API route is connected to a specific module and state, meaning that each call to the route acts on the same droplet.
-
-To implement a multi-tenant solution, where multiple users can manage their own instances, a more complex system would be required. This system would need database integration and a different authentication model to manage separate user sessions.
-
-The reasoning behind this decision is based on the complexity and time limitations given the number of proposed features. To deliver a functional proof of concept that can be further enhanced to accommodate more features, I chose to develop a single-tenant solution.
-
-This approach ensures that the project remains manageable and deliverable within the constraints, while providing a solid foundation for future enhancements to support multi-tenancy.
-
-### POST /droplet
-
-**Description:** Create a droplet instance on Digital Ocean using Terraform and the provided configuration input.
-
-**Accepted Data:**
-- `image`: Operating System Image to be installed on virtual machine (STRING) (REQUIRED)
-- `name`: Unique Hostname to refer to your virtual machine (STRING) (REQUIRED)
-- `region`: Region where your VM will be deployed (STRING) (REQUIRED)
-- `size`: Size of memory and compute resources (STRING) (REQUIRED)
-- `monitoring`: Collect and graph expanded system-level metrics, track performance, and set up alerts instantly within the control panel (BOOLEAN) (DEFAULT FALSE)
-- `ipv6`: Whether to provide an IPv6 address (BOOLEAN) (DEFAULT FALSE)
-
-**Example JSON input:**
-```json
-{
-  "image": "ubuntu-24-04-x64",
-  "name": "test",
-  "region": "lon1",
-  "size": "s-1vcpu-1gb",
-  "monitoring": true,
-  "ipv6": true
-}
-```
-**Returned Data:**
-- `droplet_id`: Unique identifier of the droplet instance created (STRING)
-- `droplet_ip_address`: IPv4 address of the droplet instance created (STRING)
-- `droplet_status`: Status of the Droplet (STRING)
-- `droplet_created_at`: Creation date of the Droplet (STRING)
-
-
-### DELETE /droplet
-
-**Description:** Destroy the droplet using Terraform's `-destroy` flag.
-
-This endpoint will destroy the droplet provisioned by the POST /droplet endpoint.
-
-
-
-## Authentication and Authorization
-
-
-
-### Design and Reasoning
-
-Authentication is handled by AWS Cognito using the client credentials grant type with machine-to-machine authentication flow.
-
-I chose the client credentials grant type because I am developing a single-tenant solution where a shared credential can be used across the team. This approach simplifies access management within the organization. It's crucial to note that using the client credentials grant type requires trusting the client application. For a multi-tenant solution or when dealing with untrusted users, I would opt for the authorization code grant, which provides a more secure authentication flow.
-
-**Current Authentication Flow:**
-1. **Client Registration:** Users are provided with a `client_id` and `client_secret` by the User Pool Admin.
-   
-2. **Authentication:** Users authenticate with the AWS Cognito User Pool using these credentials and receive an access token in return.
-
-3. **Access Token:** The access token is valid for 1 hour and must be passed with every request in the `Authorization` header of the request, formatted as `Authorization: Bearer <ACCESS_TOKEN>`.
-
-This authentication mechanism ensures secure access to the API endpoints while maintaining simplicity and cost-effectiveness during development and testing phases.
 
 
