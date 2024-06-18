@@ -17,13 +17,18 @@ resource "digitalocean_app" "go-server" {
         timeout_seconds       = 5
         failure_threshold     = 3
       }
+
+      env {
+        key   = "TF_VAR_dyanmodb_table"
+        value = var.module.aws_dynamodb_table.table_name
+      }
+      env {
+        key   = "TF_VAR_bucket_name"
+        value = var.module.aws_s3_bucket.bucket_name
+      }
       env {
         key   = "DIGITALOCEAN_API_TOKEN"
         value = var.DIGITALOCEAN_API_TOKEN
-      }
-      env {
-        key   = "BUCKET_NAME"
-        value = var.module.coreflux.bucket_name
       }
       env {
         key   = "JWK_URL"

@@ -21,6 +21,11 @@ variable "bucket_name" {
 
 }
 
+variable "dynamodb_table" {
+  type = string
+
+}
+
 
 // Droplet variables provided by the user
 

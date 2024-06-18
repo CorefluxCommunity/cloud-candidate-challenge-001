@@ -4,7 +4,11 @@ variable "bucket_name" {
   default = "coreflux-challenge"
 }
 
-
+// DYNAMO VARIABLES
+variable "dynamodb_table" {
+  type    = string
+  default = "coreflux-state-lock"
+}
 
 // DIGITAL OCEAN VARIABLES
 variable "DIGITALOCEAN_API_TOKEN" {

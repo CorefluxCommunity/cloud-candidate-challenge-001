@@ -20,6 +20,10 @@ provider "digitalocean" {
   token = var.DIGITALOCEAN_API_TOKEN
 }
 
+module "aws_dynamodb_table" {
+  source         = "./modules/aws/modules/dynamodb"
+  dynamodb_table = var.dynamodb_table
+}
 module "aws_s3_bucket" {
   source      = "./modules/aws/modules/s3"
   bucket_name = var.bucket_name

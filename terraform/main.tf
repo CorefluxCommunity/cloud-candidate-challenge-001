@@ -10,7 +10,7 @@ terraform {
 terraform {
   backend "s3" {
     bucket         = var.bucket_name
-    key            = "states/terraform.tfstate"
+    key            = var.dynamodb_table
     dynamodb_table = "terraform-state-lock-dynamo"
     region         = var.aws_region
     encrypt        = true
