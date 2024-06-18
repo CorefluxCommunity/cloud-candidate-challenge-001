@@ -1,4 +1,4 @@
-package droplet
+package domain
 
 type DropletRequest struct {
 	Image      string `json:"image"`

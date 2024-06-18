@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/Desgue/cloud-candidate-challenge-001/src/droplet"
+	"github.com/Desgue/cloud-candidate-challenge-001/src/domain"
 )
 
 type DropletService struct {
@@ -21,14 +21,14 @@ func NewDropletService() *DropletService {
 	return &DropletService{dir: "../terraform"}
 }
 
-func (s *DropletService) CreateDroplet(req droplet.DropletRequest) (*droplet.DropletResponse, error) {
+func (s *DropletService) CreateDroplet(req domain.DropletRequest) (*domain.DropletResponse, error) {
 	log.Println("Creating DigitalOcean Droplet")
 	var err error
 	if !req.IsValid() {
 		return nil, fmt.Errorf("invalid or missing request fields")
 	}
 	errCh := make(chan error, 1)
-	resCh := make(chan *droplet.DropletResponse, 1)
+	resCh := make(chan *domain.DropletResponse, 1)
 	go func() {
 		defer close(errCh)
 		defer close(resCh)
@@ -104,7 +104,7 @@ func (s DropletService) runTerraformInit() error {
 	return nil
 }
 
-func (s DropletService) runTerraformApply(req droplet.DropletRequest) error {
+func (s DropletService) runTerraformApply(req domain.DropletRequest) error {
 	log.Println("Running terraform apply")
 	token := os.Getenv("DIGITALOCEAN_API_TOKEN")
 	awsRegion := os.Getenv("AWS_REGION")
@@ -152,7 +152,7 @@ func (s DropletService) runTerraformDestroy() error {
 	return nil
 }
 
-func (s DropletService) terraformOutput() (*droplet.DropletResponse, error) {
+func (s DropletService) terraformOutput() (*domain.DropletResponse, error) {
 	log.Println("Running terraform output")
 	cmd := exec.Command("terraform", "output", "-json")
 	cmd.Dir = s.dir
@@ -161,7 +161,7 @@ func (s DropletService) terraformOutput() (*droplet.DropletResponse, error) {
 		log.Println("Error running terraform output")
 		return nil, err
 	}
-	var dropletResponse droplet.DropletResponse
+	var dropletResponse domain.DropletResponse
 	err = json.Unmarshal(output, &dropletResponse)
 	if err != nil {
 		log.Println("fail to unmarshal response")

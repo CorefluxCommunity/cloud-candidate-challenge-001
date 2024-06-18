@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/Desgue/cloud-candidate-challenge-001/src/droplet"
+	"github.com/Desgue/cloud-candidate-challenge-001/src/domain"
 	"github.com/Desgue/cloud-candidate-challenge-001/src/svc"
 )
 
@@ -31,7 +31,7 @@ func (c *DropletController) GetHandler(w http.ResponseWriter, _ *http.Request) {
 func (c *DropletController) PostHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	// Recebe as configuraçoes para criar uma instancia no digital ocean em json e chama o serviço que se comunica com o terraform
-	var dropletReq droplet.DropletRequest
+	var dropletReq domain.DropletRequest
 	err := json.NewDecoder(r.Body).Decode(&dropletReq)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
