@@ -1,3 +1,12 @@
+// S3 VARIABLES
+variable "bucket_name" {
+  type    = string
+  default = "coreflux-challenge"
+}
+
+
+
+// DIGITAL OCEAN VARIABLES
 variable "DIGITALOCEAN_API_TOKEN" {
   type = string
 }

@@ -9,7 +9,7 @@ resource "aws_s3_bucket" "coreflux" {
 
 variable "bucket_name" {
   type    = string
-  default = "cloud-challenge-s3-state"
+  default = "coreflux-challenge"
 }
 
 output "bucket_name" {

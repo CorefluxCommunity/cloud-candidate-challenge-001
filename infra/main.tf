@@ -20,6 +20,11 @@ provider "digitalocean" {
   token = var.DIGITALOCEAN_API_TOKEN
 }
 
+module "aws_s3_bucket" {
+  source      = "./modules/aws/modules/s3"
+  bucket_name = var.bucket_name
+}
+
 module "digitalocean_app" {
   source                 = "./modules/digitalocean"
   AWS_ACCESS_KEY_ID      = var.AWS_ACCESS_KEY_ID
