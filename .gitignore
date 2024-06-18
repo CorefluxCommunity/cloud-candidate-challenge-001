@@ -1,0 +1,7 @@
+planejamento.txt
+*.tfvars
+*.lock.hcl
+*.tfstate
+*.terraform
+*.backup
+.env
