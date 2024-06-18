@@ -1,3 +1,15 @@
+terraform {
+  required_providers {
+    digitalocean = {
+      source  = "digitalocean/digitalocean"
+      version = "2.39.2"
+    }
+  }
+}
+provider "digitalocean" {
+  token = var.DIGITALOCEAN_API_TOKEN
+}
+
 resource "digitalocean_app" "go-server" {
   spec {
     name   = "orchestration-engine"
@@ -20,11 +32,11 @@ resource "digitalocean_app" "go-server" {
 
       env {
         key   = "TF_VAR_dyanmodb_table"
-        value = var.module.aws_dynamodb_table.table_name
+        value = var.dynamodb_table_name
       }
       env {
         key   = "TF_VAR_bucket_name"
-        value = var.module.aws_s3_bucket.bucket_name
+        value = var.s3_bucket_name
       }
       env {
         key   = "DIGITALOCEAN_API_TOKEN"

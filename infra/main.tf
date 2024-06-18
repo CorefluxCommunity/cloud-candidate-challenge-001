@@ -1,9 +1,5 @@
 terraform {
   required_providers {
-    digitalocean = {
-      source  = "digitalocean/digitalocean"
-      version = "2.39.1"
-    }
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
@@ -14,10 +10,6 @@ provider "aws" {
   region     = var.AWS_REGION
   access_key = var.AWS_ACCESS_KEY_ID
   secret_key = var.AWS_SECRET_ACCESS_KEY
-}
-
-provider "digitalocean" {
-  token = var.DIGITALOCEAN_API_TOKEN
 }
 
 module "aws_dynamodb_table" {
@@ -37,5 +29,7 @@ module "digitalocean_app" {
   COGNITO_ISSUER         = var.COGNITO_ISSUER
   JWK_URL                = var.JWK_URL
   DIGITALOCEAN_API_TOKEN = var.DIGITALOCEAN_API_TOKEN
+  dynamodb_table_name    = module.aws_dynamodb_table.table_name
+  s3_bucket_name         = module.aws_s3_bucket.bucket_name
 }
 
